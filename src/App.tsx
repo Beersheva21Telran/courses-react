@@ -10,6 +10,7 @@ import CoursesContext, { defaultValue } from './store/context';
 
 
 const theme = createTheme();
+//example of thene custimization
 // theme.typography.body1 = {
 //   fontSize: '1.2rem',
 //   '@media (min-width:568px)': {
