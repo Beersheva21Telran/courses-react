@@ -1,5 +1,7 @@
 
+import { Box, List, ListItem } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { nextTick } from 'process';
 import { FC, ReactNode, useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import NavigatorResponsive from './components/common/navigator-responsive';
@@ -8,6 +10,7 @@ import { PATH_COURSES, routes } from './config/routes-config';
 import { college } from './config/service-config';
 import Course from './models/course';
 import CoursesStore from './models/courses-store-type';
+import PublisherNumbers from './publisher-numbers';
 import College from './services/college';
 import CoursesContext, { initialCourses } from './store/context';
 
@@ -22,44 +25,31 @@ const theme = createTheme();
 //     fontSize: '3rem'
 //   }
 // }
+const publisher = new PublisherNumbers();
 const App: FC = () => {
 
-  const [storeValueState, setStoreValue] = useState<CoursesStore>(initialCourses);
-  function poller() {
-    college.getAllCourses().then(arr => {
-      storeValueState.list = arr;
-      setStoreValue({ ...storeValueState })
-    })
-  }
-  function addCourse(course: Course) {
-    college.addCourse(course).then(() => poller());
-  }
-
-  function removeCourse(id: number) {
-    college.removeCourse(id).then(() => poller());
-  }
-  function getRoutes(): ReactNode[] {
-    return routes.map(r => <Route key={r.path} path={r.path} element={r.element} />)
-  }
+  const [numbers, setNumbers] = useState<number[]>([]);
   useEffect(() => {
-
-    storeValueState.add = addCourse;
-    storeValueState.remove = removeCourse;
-    poller();
-    let update = setInterval(poller, 2000);
-    return () => clearInterval(update);
-  }, [])
-  return <CoursesContext.Provider value={storeValueState}>
-
-    <BrowserRouter>
-      <NavigatorResponsive items={routes} />
-      <Routes>
-        {getRoutes()}
-        <Route path='/' element={<Navigate to={PATH_COURSES}></Navigate>} />
-      </Routes>
-    </BrowserRouter>
-
-  </CoursesContext.Provider>
+    const subscription = publisher.getNumbers().subscribe({
+      next(arr: number[]) {
+        setNumbers(arr);
+      },
+      error(err: any) {
+        console.log(err)
+      }
+    })
+    return () => subscription.unsubscribe();
+  }
+    , []);
+  function getItems(): ReactNode[] {
+    console.log(numbers);
+    return numbers.map((n, index) => <ListItem key={index}>{n}</ListItem>)
+  }
+  return <Box>
+    <List>
+      {getItems()}
+    </List>
+  </Box>
 }
 
 export default App;
