@@ -12,6 +12,7 @@ import { DISPLAY_NAME_ERROR, nonAuthorizedUser, UserData } from './models/common
 import { Alert } from '@mui/material';
 import process from 'process';
 import ErrorCode from './models/common/error-code';
+import { AUTH_TOKEN } from './services/courses-service-rest';
 
 
 function getRelevantRoutes(userData: UserData): RouteType[] {
@@ -48,7 +49,9 @@ const App: FC = () => {
      
 
     } else if (code === ErrorCode.AUTH_ERROR) {
-      authService.logout();
+      if (!!storeValueState.userData.username) {
+        authService.logout();
+      }
       setFlErrorServer(false)
 
 
@@ -91,6 +94,7 @@ const App: FC = () => {
     let subscription:any;
      subscription = getData();
     function getData(): Subscription {
+      
       subscription && subscription.unsubscribe();
       return college.getAllCourses().subscribe({
 

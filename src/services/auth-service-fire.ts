@@ -7,16 +7,27 @@ import { LoginData } from "../models/common/login-data";
 import { nonAuthorizedUser, UserData } from "../models/common/user-data";
 import { collectionData } from "rxfire/firestore";
 import appFire from "../config/fire-config";
+import { collection, CollectionReference, getFirestore } from "firebase/firestore";
 export default class AuthServiceFire implements AuthService {
     private authFire = getAuth(appFire);
-    constructor(private  collectionAdministrators: string) {
-
-    }
+    private collectionAuth: CollectionReference;
+    constructor(private collectionAdministrators: string) {
+        this.collectionAuth = collection(getFirestore(appFire), this.collectionAdministrators);
+    };
     getUserData(): Observable<UserData> {
-        return authState(this.authFire).pipe(map(user => (
-            !!user ? {username: user.uid, isAdmin: true,
-                 displayName: user.displayName || user.email!} : nonAuthorizedUser
-        )));
+        return authState(this.authFire).pipe(
+            mergeMap(userFire => {
+                return collectionData(this.collectionAuth).pipe(
+                    map(admins => (
+                        !!userFire ? {
+                                    username: userFire.uid,
+                                    displayName: userFire.displayName || userFire.email as string,
+                                    isAdmin: admins.findIndex(doc => doc.email == userFire.email) >= 0
+                                } : nonAuthorizedUser
+                    ))
+                )
+            })
+        )
     }
     login(loginData: LoginData): Promise<boolean> {
         return signInWithEmailAndPassword(this.authFire, loginData.email, loginData.password)
