@@ -13,7 +13,9 @@ import { Alert } from '@mui/material';
 import process from 'process';
 import ErrorCode from './models/common/error-code';
 import { AUTH_TOKEN } from './services/courses-service-rest';
-
+import {useDispatch, useSelector} from 'react-redux'
+import { userDataSelector } from './redux/store';
+import { setCourses, setUserData } from './redux/actions';
 
 function getRelevantRoutes(userData: UserData): RouteType[] {
   let resRoutes = routes;
@@ -25,8 +27,8 @@ function getRelevantRoutes(userData: UserData): RouteType[] {
 }
 
 const App: FC = () => {
-
-  const [storeValueState, setStoreValue] = useState<CoursesStore>(initialCourses);
+const userData: UserData = useSelector(userDataSelector);
+const dispatch = useDispatch();
   const [flErrorServer, setFlErrorServer] = useState<boolean>(false);
   const functionsInit = useCallback(() => {
     initialCourses.add = course => college.addCourse(course).catch(err => handleError(err));
@@ -49,7 +51,7 @@ const App: FC = () => {
      
 
     } else if (code === ErrorCode.AUTH_ERROR) {
-      if (!!storeValueState.userData.username) {
+      if (!!userData.username) {
         authService.logout();
       }
       setFlErrorServer(false)
@@ -63,9 +65,9 @@ const App: FC = () => {
     return relevantRoutes.map((r: RouteType) => <Route key={r.path} path={r.path} element={r.element} />)
   }
   useEffect(() => {
-    setRelevantRoutes(getRelevantRoutes((storeValueState.userData)));
+    setRelevantRoutes(getRelevantRoutes((userData)));
 
-  }, [storeValueState.userData])
+  }, [userData])
   useEffect(() => {
 
     function getUserData(): Subscription {
@@ -76,8 +78,7 @@ const App: FC = () => {
             handleError(ErrorCode.SERVER_UNAVAILABLE)
           } else {
             handleError(ErrorCode.NO_ERROR);
-            storeValueState.userData = ud;
-            setStoreValue({ ...storeValueState })
+           dispatch(setUserData(ud))
           }
 
         }
@@ -101,8 +102,7 @@ const App: FC = () => {
         next(arr) {
           handleError(ErrorCode.NO_ERROR);
           
-          storeValueState.list = arr;
-          setStoreValue({ ...storeValueState })
+          dispatch(setCourses(arr))
         },
         error(err) {
           handleError(err);
@@ -115,7 +115,7 @@ const App: FC = () => {
 
     return () => subscription.unsubscribe();
   }, [])
-  return <CoursesContext.Provider value={storeValueState}>
+  return <CoursesContext.Provider value={initialCourses}>
     {flErrorServer ? <Alert severity='error'>Server is unavailable</Alert> :
       <BrowserRouter>
         <NavigatorResponsive items={relevantRoutes} />
@@ -133,3 +133,7 @@ const App: FC = () => {
 }
 
 export default App;
+
+
+
+
