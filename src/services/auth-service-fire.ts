@@ -1,5 +1,5 @@
 import AuthService from "./auth-service";
-import {getAuth, signInWithEmailAndPassword, signOut} from 'firebase/auth';
+import {getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut} from 'firebase/auth';
 import {authState} from 'rxfire/auth';
 import {from, Observable} from 'rxjs';
 import {map, mergeMap} from 'rxjs/operators';
@@ -44,6 +44,7 @@ export default class AuthServiceFire implements AuthService {
     login(loginData: LoginData): Promise<boolean> {
         return signInWithEmailAndPassword(this.authFire, loginData.email, loginData.password)
         .then(()=>true).catch(()=>false);
+       
     }
     logout(): Promise<boolean> {
         return signOut(this.authFire).then(()=>true).catch(()=>false);
