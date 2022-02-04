@@ -3,7 +3,7 @@ import { FC, ReactNode, useCallback, useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import NavigatorResponsive from './components/common/navigator-responsive';
 import { Subscription } from 'rxjs';
-import { developmentRoutes, routes } from './config/routes-config';
+import { developmentRoutes, PATH_LOGOUT, routes } from './config/routes-config';
 import { authService, college } from './config/service-config';
 import CoursesStore from './models/courses-store-type';
 import CoursesContext, { initialCourses } from './store/context';
@@ -22,6 +22,8 @@ function getRelevantRoutes(userData: UserData): RouteType[] {
   if (process.env.NODE_ENV === 'development') {
     resRoutes = resRoutes.concat(developmentRoutes);
   }
+  const logoutRoute = resRoutes.find(r => r.path === PATH_LOGOUT);
+  logoutRoute!.label = userData.displayName;
   return resRoutes.filter(r => (!!userData.username && r.authenticated)
     || (userData.isAdmin && r.adminOnly) || (!userData.username && !r.authenticated && !r.adminOnly))
 }

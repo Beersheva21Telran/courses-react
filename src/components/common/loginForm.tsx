@@ -1,15 +1,17 @@
-import { Box, Button, TextField, Typography } from '@mui/material'
-import React, { FC, useState, useEffect } from 'react'
+import { Box, Button, IconButton, TextField, Typography } from '@mui/material'
+import React, { FC, useState, useEffect, ReactNode } from 'react'
 import { LoginData } from '../../models/common/login-data';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 import Avatar from '@mui/material/Avatar';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import NetworkIcon from '../../models/common/network-icon';
 
 type LoginFormProps = {
     loginFn: (loginData: LoginData) => Promise<boolean>;
     passwordValidationFn: (password: string) => string;
+    networks?: NetworkIcon[]
 }
 const emptyLoginData: LoginData = { email: "", password: "" }
 
@@ -17,7 +19,7 @@ const LoginForm: FC<LoginFormProps> = (props) => {
     const theme = createTheme();
 
 
-    const { loginFn, passwordValidationFn } = props;
+    const { loginFn, passwordValidationFn, networks } = props;
     const [loginData, setLoginData] = useState<LoginData>(emptyLoginData);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [flValid, setflValid] = useState<boolean>(false);
@@ -48,6 +50,17 @@ const LoginForm: FC<LoginFormProps> = (props) => {
         loginData.password = password;
         setLoginData({ ...loginData });
     }
+    function getNetworkIcons(): ReactNode {
+      if (networks) {
+          return networks.map(nw => <IconButton key={nw.name}
+             onClick={() =>
+              loginFn({ email: nw.name, password: '' })}
+               >
+
+              <Avatar src={nw.iconUrl} sx={{width:{xs: '6vh', sm: '6vw', lg: '3vw'}}}  />
+          </IconButton>)
+      }
+  }
 
 
        return (
@@ -104,6 +117,10 @@ const LoginForm: FC<LoginFormProps> = (props) => {
                 Sign In
               </Button>            
             </Box>
+           { (networks && networks.length != 0) && <Box>
+             or with networks <br/>  
+              {getNetworkIcons()}
+            </Box>}
           </Box>
         </Container>
         </ThemeProvider>
