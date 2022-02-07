@@ -6,7 +6,6 @@ import LoginForm from "../common/loginForm";
 import courseData from "../../config/courseData.json"
 import { Navigate } from "react-router-dom";
 import { PATH_COURSES } from "../../config/routes-config";
-import CoursesContext from "../../store/context";
 const Login: FC = () => {
     
     const [flNavigate, setFlNavigate] = useState<boolean>(false);
