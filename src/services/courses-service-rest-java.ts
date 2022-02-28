@@ -43,10 +43,10 @@ class CoursesCache {
     }
 }
 
-function getHeaders(): { Authorization: string, "Content-Type": string } {
-    return { Authorization: "Bearer " + localStorage.getItem(AUTH_TOKEN), "Content-Type": "application/json" };
+function getHeaders(): { Authorization?: string, "Content-Type": string } {
+    return { "Content-Type": "application/json" };
 }
-export default class CoursesServiceRest implements CoursesService {
+export default class CoursesServiceRestJava implements CoursesService {
     cache: CoursesCache = new CoursesCache();
     constructor(private url: string) { }
      add(course: Course): Promise<Course> {
@@ -83,7 +83,6 @@ export default class CoursesServiceRest implements CoursesService {
             return new Observable<Course[]>(observer => {
                 const interval = setInterval(() => {
                  
-                        if (!!localStorage.getItem(AUTH_TOKEN)) {
                             fetchGet(this.url).then(courses => {
                             if (!this.cache.isEquals(courses) || this.cache.isEmpty) {
                                 this.cache.setCache(courses);
@@ -94,7 +93,6 @@ export default class CoursesServiceRest implements CoursesService {
                             this.cache.setCache([]);
                             observer.error(err)
                         });
-                        }
                         
 
                    
