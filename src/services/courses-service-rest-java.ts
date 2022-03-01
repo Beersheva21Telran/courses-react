@@ -1,8 +1,9 @@
 import Course from "../models/course";
 import CoursesService from "./courses-service";
-import { Observable, from } from "rxjs"
+import { Observable, from, Observer } from "rxjs"
 import ErrorCode from "../models/common/error-code";
-const pollingInterval = 1000;
+import { CompatClient, Stomp } from "@stomp/stompjs";
+import SockJS from 'sockjs-client';
 export const AUTH_TOKEN = "auth_token";
 
 async function  getResponse(url: string, init?: RequestInit  ): Promise<Response>  {
@@ -48,7 +49,8 @@ function getHeaders(): { Authorization?: string, "Content-Type": string } {
 }
 export default class CoursesServiceRestJava implements CoursesService {
     cache: CoursesCache = new CoursesCache();
-    constructor(private url: string) { }
+    stompClient: CompatClient | undefined;
+    constructor(private url: string, private wsUrl: string) { }
      add(course: Course): Promise<Course> {
         (course as any).userId = 1;
         return requestRest(this.url, {
@@ -81,24 +83,9 @@ export default class CoursesServiceRestJava implements CoursesService {
         } else {
             this.cache = new CoursesCache();
             return new Observable<Course[]>(observer => {
-                const interval = setInterval(() => {
-                 
-                            fetchGet(this.url).then(courses => {
-                            if (!this.cache.isEquals(courses) || this.cache.isEmpty) {
-                                this.cache.setCache(courses);
-                                observer.next(courses);
-                            }
-                        }).catch(err => {
-                            
-                            this.cache.setCache([]);
-                            observer.error(err)
-                        });
-                        
-
-                   
-                }, pollingInterval);
-
-                return () => {console.log('clearing'); clearInterval(interval)};
+                 this.fetchData(observer);
+                 this.connect(observer);
+                return () => {this.disconnect()};
             });
         }
 
@@ -111,6 +98,23 @@ export default class CoursesServiceRestJava implements CoursesService {
             body: JSON.stringify(newCourse)
         });
         return oldCourse as Course;
+    }
+    private fetchData(observer: Observer<Course[]>) {
+        fetchGet(this.url).then(data => observer.next(data)).
+        catch(err => observer.error(err))
+    }
+    private connect(observer: Observer<Course[]>) {
+        const webSocket = new SockJS(`${this.wsUrl}/websocket-courses`);
+        this.stompClient = Stomp.over(webSocket);
+        this.stompClient.connect({}, (frame: any) => {
+            this.stompClient!.subscribe("/topic/courses", message => {
+                console.log(message.body);
+                this.fetchData(observer)
+            })
+        }, (error:any) => observer.error(error), () => observer.error("disconnected"))
+    }
+    private disconnect() {
+        this.stompClient?.disconnect()
     }
 }
  function fetchGet(url: string): Promise<any> {

@@ -26,7 +26,8 @@ export const serviceSupportedNetworks: NetworkIcon[] = [
 
 //const courseProvider = new CoursesServiceFirestore("courses", courseData.minId , courseData.maxId);
 //const courseProvider = new CoursesServiceRest("http://localhost:3500/courses");
-const courseProvider = new CoursesServiceRestJava("http://localhost:8080/courses");
+const URL = "http://localhost:8080";
+const courseProvider = new CoursesServiceRestJava(`${URL}/courses`, URL);
 export const college = new College(courseProvider);
 //export const authService = new AuthServiceFire("administrators");
 //export const authService = new AuthServiceJwt("http://localhost:3500");
