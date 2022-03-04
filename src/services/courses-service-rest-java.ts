@@ -4,7 +4,8 @@ import { Observable, from, Observer } from "rxjs"
 import ErrorCode from "../models/common/error-code";
 import { CompatClient, Stomp } from "@stomp/stompjs";
 import SockJS from 'sockjs-client';
-export const AUTH_TOKEN = "auth_token";
+import { AUTH_TOKEN } from "./courses-service-rest";
+
 
 async function  getResponse(url: string, init?: RequestInit  ): Promise<Response>  {
     let flInnerCatch = false;
@@ -45,7 +46,8 @@ class CoursesCache {
 }
 
 function getHeaders(): { Authorization?: string, "Content-Type": string } {
-    return { "Content-Type": "application/json" };
+    return { "Content-Type": "application/json",
+     Authorization: localStorage.getItem(AUTH_TOKEN) as string};
 }
 export default class CoursesServiceRestJava implements CoursesService {
     cache: CoursesCache = new CoursesCache();
@@ -119,7 +121,7 @@ export default class CoursesServiceRestJava implements CoursesService {
 }
  function fetchGet(url: string): Promise<any> {
         return  requestRest(url, {
-            headers: getHeaders()
+            headers: {Authorization: localStorage.getItem(AUTH_TOKEN) as string}
         }); 
     
 }

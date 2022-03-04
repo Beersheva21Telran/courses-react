@@ -9,6 +9,7 @@ import NetworkIcon from "../models/common/network-icon";
 import CoursesServiceRest from "../services/courses-service-rest";
 import AuthServiceJwt from "../services/auth-service-jwt";
 import CoursesServiceRestJava from "../services/courses-service-rest-java";
+import AuthServiceRestJava from "../services/auth-service-rest-java";
 // export const serviceSupportedNetworks: NetworkIcon[] = [
 //     {name: FACEBOOK, iconUrl: "/facebook.png"},
 //     {name: GOOGLE, iconUrl: "/google.png"},
@@ -31,4 +32,4 @@ const courseProvider = new CoursesServiceRestJava(`${URL}/courses`, URL);
 export const college = new College(courseProvider);
 //export const authService = new AuthServiceFire("administrators");
 //export const authService = new AuthServiceJwt("http://localhost:3500");
-export const authService = new AuthServiceFake();
+export const authService = new AuthServiceRestJava(URL);

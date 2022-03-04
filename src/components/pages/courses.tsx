@@ -62,7 +62,7 @@ const Courses: FC = () => {
         return 'isNotMobile';
     }
     const callbackMode = useCallback(() =>
-        setSizedColumns(getFilteredColumns((dashboardCourseSizes as any)[mode])), [userData, mode]);
+        setSizedColumns(getFilteredColumns((dashboardCourseSizes as any)[mode])), [userData, mode, courses]);
     const textModal = useRef<string[]>(['']);
 
     useEffect(() => {
