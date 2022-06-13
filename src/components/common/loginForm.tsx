@@ -118,7 +118,7 @@ const LoginForm: FC<LoginFormProps> = (props) => {
               </Button>            
             </Box>
            { (networks && networks.length != 0) && <Box>
-             or with networks <br/>  
+             Or with <br/>  
               {getNetworkIcons()}
             </Box>}
           </Box>
